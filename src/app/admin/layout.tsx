@@ -36,7 +36,7 @@ export default function AdminLayout({
     if (user === undefined) return
     if (user === null) {
       const returnUrl = encodeURIComponent(pathname || '/admin/products')
-      router.replace(`/sign-in?redirect=${returnUrl}`)
+      router.replace(`/handler/sign-in?redirect=${returnUrl}`)
     }
   }, [user, pathname, router])
 
