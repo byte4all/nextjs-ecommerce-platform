@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackClientApp } from "../stack/client";
 import "@/styles/globals.css";
 import { satoshi } from "@/styles/fonts";
 import TopBanner from "@/components/layout/Banner/TopBanner";
@@ -23,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={satoshi.className}>
+      <body className={satoshi.className}><StackProvider app={stackClientApp}><StackTheme>
         <HolyLoader color="#868686" />
         <TopBanner />
         <Providers>
@@ -31,7 +33,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <Footer />
-      </body>
+      </StackTheme></StackProvider></body>
     </html>
   );
 }

@@ -34,3 +34,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# env files
+.env
+
+# cursor
+.mcp.json
+.cursor/mcp.json
+
+# vscode
+.vscode/mcp.json
+
+# mcp files
+.mcp.json
