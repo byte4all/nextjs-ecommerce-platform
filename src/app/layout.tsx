@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "../stack/client";
+import { stackClientApp } from "@/stack/client";
 import "@/styles/globals.css";
 import { satoshi } from "@/styles/fonts";
-import TopBanner from "@/components/layout/Banner/TopBanner";
-import TopNavbar from "@/components/layout/Navbar/TopNavbar";
-import Footer from "@/components/layout/Footer";
+import ConditionalSiteChrome from "@/components/layout/ConditionalSiteChrome";
 import HolyLoader from "holy-loader";
 import Providers from "./providers";
 
@@ -25,15 +23,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={satoshi.className}><StackProvider app={stackClientApp}><StackTheme>
-        <HolyLoader color="#868686" />
-        <TopBanner />
-        <Providers>
-          <TopNavbar />
-          {children}
-        </Providers>
-        <Footer />
-      </StackTheme></StackProvider></body>
+      <body className={satoshi.className}>
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            <HolyLoader color="#868686" />
+            <Providers>
+              <ConditionalSiteChrome>{children}</ConditionalSiteChrome>
+            </Providers>
+          </StackTheme>
+        </StackProvider>
+      </body>
     </html>
   );
 }

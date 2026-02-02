@@ -1,24 +1,117 @@
-import { redirect } from "next/navigation";
-import { stackServerApp } from "@/stack/server";
+'use client'
 
-export default async function AdminLayout({
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { useUser } from '@stackframe/stack'
+import {
+  FiHome,
+  FiPackage,
+  FiTag,
+  FiShoppingBag,
+  FiUsers,
+  FiBarChart,
+  FiArrowLeft
+} from 'react-icons/fi'
+
+const navigation = [
+  { name: 'Dashboard', href: '/admin', icon: FiHome },
+  { name: 'Products', href: '/admin/products', icon: FiPackage },
+  { name: 'Categories', href: '/admin/categories', icon: FiTag },
+  { name: 'Orders', href: '/admin/orders', icon: FiShoppingBag },
+  { name: 'Users', href: '/admin/users', icon: FiUsers },
+  { name: 'Analytics', href: '/admin/analytics', icon: FiBarChart },
+]
+
+export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  // Server-side: Get the current user from Stack Auth (reads from Next.js cookies)
-  const user = await stackServerApp.getUser({
-    or: "redirect",
-  });
+  const pathname = usePathname()
+  const router = useRouter()
+  const user = useUser({ or: 'return-null' })
 
-  // Server-side: Check if user has admin access via serverMetadata
-  // In Stack Auth dashboard, set serverMetadata: { "access_admin_dashboard": true }
-  const serverMetadata = user.serverMetadata as { access_admin_dashboard?: boolean } | null;
-  const hasAdminAccess = serverMetadata?.access_admin_dashboard === true;
+  useEffect(() => {
+    if (user === undefined) return
+    if (user === null) {
+      const returnUrl = encodeURIComponent(pathname || '/admin/products')
+      router.replace(`/sign-in?redirect=${returnUrl}`)
+    }
+  }, [user, pathname, router])
 
-  if (!hasAdminAccess) {
-    redirect("/?error=access_denied");
+  // Open Products by default when visiting /admin (not Dashboard)
+  useEffect(() => {
+    if (pathname === '/admin') {
+      router.replace('/admin/products')
+    }
+  }, [pathname, router])
+
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+      </div>
+    )
   }
 
-  return <>{children}</>;
+  if (user === null) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Top navbar - starting point of the page */}
+      <div className="fixed top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-x-2 sm:gap-x-4 min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-gray-900 truncate mr-2 sm:mr-4">Admin Panel</h1>
+          <nav className="flex items-center gap-x-1 sm:gap-x-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <item.icon className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="truncate">{item.name}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+        <div className="flex items-center gap-x-3 sm:gap-x-4 lg:gap-x-6 flex-shrink-0">
+          <Link
+            href="/shop"
+            className="flex items-center gap-x-1.5 sm:gap-x-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <FiArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span>BACK</span>
+          </Link>
+          <Link
+            href="/"
+            className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap hidden sm:inline"
+          >
+            View Site
+          </Link>
+        </div>
+      </div>
+
+      {/* Main content - starts below navbar */}
+      {pathname !== '/admin' && (
+        <div className="pt-16">
+          <main className="py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              {children}
+            </div>
+          </main>
+        </div>
+      )}
+    </div>
+  )
 }
